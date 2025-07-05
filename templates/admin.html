@@ -120,7 +120,7 @@
         </div>
 
         <!-- Test Bot -->
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-header">
                 <h3>Testar Bot</h3>
             </div>
@@ -136,6 +136,48 @@
                         <input type="text" id="testMessage" class="form-control" placeholder="Digite sua mensagem...">
                         <button class="btn btn-primary" id="sendMessage">Enviar</button>
                         <button class="btn btn-secondary" id="resetChat">Resetar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WhatsApp Configuration -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Configuração do WhatsApp</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5>Como configurar o WhatsApp Business API:</h5>
+                    <ol>
+                        <li>Acesse o <a href="https://developers.facebook.com/" target="_blank">Facebook Developers</a></li>
+                        <li>Crie ou selecione seu app</li>
+                        <li>Adicione o produto "WhatsApp"</li>
+                        <li>Configure seu número de teste</li>
+                        <li>Copie o Token de Acesso e o ID do Número</li>
+                        <li>Configure o webhook URL: <code>https://seu-dominio.com/webhook</code></li>
+                        <li>Inscreva-se para receber mensagens no webhook</li>
+                    </ol>
+                </div>
+                
+                <div class="mt-3">
+                    <h5>Status da Configuração:</h5>
+                    <ul class="list-unstyled">
+                        <li>✅ Webhook URL: <code>/webhook</code></li>
+                        <li>✅ Verify Token configurado no .env</li>
+                        <li id="whatsapp-status">⏳ Verificando conexão...</li>
+                    </ul>
+                </div>
+
+                <div class="mt-3">
+                    <h5>Testar Envio de Mensagem:</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" id="testWhatsAppNumber" class="form-control" placeholder="Número (ex: 5511999999999)">
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-success" id="sendWhatsAppTest">Enviar Teste</button>
+                        </div>
                     </div>
                 </div>
             </div>

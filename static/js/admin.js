@@ -270,4 +270,54 @@ document.addEventListener('DOMContentLoaded', function() {
             alertDiv.remove();
         }, 5000);
     }
-});
+    
+    // WhatsApp test functionality
+    document.getElementById('sendWhatsAppTest').addEventListener('click', async function() {
+        const number = document.getElementById('testWhatsAppNumber').value;
+        if (!number) {
+            showAlert('warning', 'Digite um número de telefone');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/webhook/send-test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    to: number,
+                    message: 'Olá! Este é um teste do seu Bot de Sobrancelhas! 🌟\n\nSe você recebeu esta mensagem, seu bot está funcionando corretamente!'
+                })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                showAlert('success', 'Mensagem de teste enviada com sucesso!');
+            } else {
+                showAlert('danger', 'Erro ao enviar mensagem de teste');
+            }
+        } catch (error) {
+            showAlert('danger', 'Erro de conexão');
+        }
+    });
+    
+    // Check WhatsApp configuration status
+    async function checkWhatsAppStatus() {
+        const statusElement = document.getElementById('whatsapp-status');
+        try {
+            const response = await fetch('/health');
+            if (response.ok) {
+                statusElement.innerHTML = '✅ Servidor rodando corretamente';
+                // Check if WhatsApp credentials are configured
+                if (window.location.hostname !== 'localhost') {
+                    statusElement.innerHTML += '<br>✅ Webhook disponível em: ' + window.location.origin + '/webhook';
+                }
+            }
+        } catch (error) {
+            statusElement.innerHTML = '❌ Erro ao verificar status do servidor';
+        }
+    }
+    
+    // Check status on page load
+    checkWhatsAppStatus();
