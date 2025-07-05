@@ -3,8 +3,6 @@ from config import Config
 from models import db
 from blueprints.admin import admin_bp
 from blueprints.bot import bot_bp
-from webhook_simple import webhook_bp
-app.register_blueprint(webhook_bp)
 import os
 
 def create_app():
@@ -82,8 +80,10 @@ def create_app():
     
     return app
 
+# Create app instance for Gunicorn
+application = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') == 'development'
-    app.run(debug=debug, host='0.0.0.0', port=port)
+    application.run(debug=debug, host='0.0.0.0', port=port)
