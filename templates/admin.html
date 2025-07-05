@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Configuração do Bot do Studio</h1>
+        
+        <!-- Business Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Informações do Negócio</h3>
+            </div>
+            <div class="card-body">
+                <form id="hoursForm">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Dia</th>
+                                    <th>Abertura</th>
+                                    <th>Fechamento</th>
+                                    <th>Fechado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% set days = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'] %}
+                                {% for hour in hours %}
+                                <tr>
+                                    <td>{{ days[hour.day_of_week] }}</td>
+                                    <td>
+                                        <input type="time" class="form-control form-control-sm" 
+                                               id="open_{{ hour.id }}" value="{{ hour.open_time }}"
+                                               {% if hour.is_closed %}disabled{% endif %}>
+                                    </td>
+                                    <td>
+                                        <input type="time" class="form-control form-control-sm" 
+                                               id="close_{{ hour.id }}" value="{{ hour.close_time }}"
+                                               {% if hour.is_closed %}disabled{% endif %}>
+                                    </td>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input closed-check" type="checkbox" 
+                                                   id="closed_{{ hour.id }}" data-hour-id="{{ hour.id }}"
+                                                   {% if hour.is_closed %}checked{% endif %}>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar Horários</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Services -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3>Serviços</h3>
+                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                    <i class="fas fa-plus"></i> Adicionar Serviço
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Serviço</th>
+                                <th>Preço</th>
+                                <th>Duração</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="servicesTable">
+                            {% for service in services %}
+                            <tr data-service-id="{{ service.id }}">
+                                <td>{{ service.name }}</td>
+                                <td>R$ {{ "%.2f"|format(service.price) }}</td>
+                                <td>{{ service.duration_minutes }} min</td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning edit-service" data-service-id="{{ service.id }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-service" data-service-id="{{ service.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bot Configuration -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Configuração do Bot</h3>
+            </div>
+            <div class="card-body">
+                <form id="botConfigForm">
+                    <div class="mb-3">
+                        <label for="bot_tone" class="form-label">Tom de Conversa do Bot</label>
+                        <textarea class="form-control" id="bot_tone" rows="3" 
+                                  placeholder="Ex: Seja simpática, profissional e use linguagem moderna...">{{ business.bot_tone }}</textarea>
+                        <small class="form-text text-muted">Descreva como o bot deve se comunicar com os clientes</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bot_intro_message" class="form-label">Mensagem de Introdução</label>
+                        <textarea class="form-control" id="bot_intro_message" rows="2" 
+                                  placeholder="Ex: Olá! Seja bem-vinda ao Studio X! Como posso ajudar?">{{ business.bot_intro_message }}</textarea>
+                        <small class="form-text text-muted">Primeira mensagem que o bot enviará aos clientes</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar Configuração do Bot</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Test Bot -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Testar Bot</h3>
+            </div>
+            <div class="card-body">
+                <p>Para testar o bot no terminal, execute:</p>
+                <pre class="bg-light p-3"><code>python test_bot.py</code></pre>
+                <p>Ou teste aqui:</p>
+                <div class="chat-test">
+                    <div id="chatMessages" class="border rounded p-3 mb-3" style="height: 300px; overflow-y: auto;">
+                        <div class="text-muted">Envie uma mensagem para começar...</div>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="testMessage" class="form-control" placeholder="Digite sua mensagem...">
+                        <button class="btn btn-primary" id="sendMessage">Enviar</button>
+                        <button class="btn btn-secondary" id="resetChat">Resetar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Service Modal -->
+<div class="modal fade" id="addServiceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar Novo Serviço</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addServiceForm">
+                    <div class="mb-3">
+                        <label for="serviceName" class="form-label">Nome do Serviço</label>
+                        <input type="text" class="form-control" id="serviceName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="servicePrice" class="form-label">Preço (R$)</label>
+                        <input type="number" class="form-control" id="servicePrice" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="serviceDuration" class="form-label">Duração (minutos)</label>
+                        <input type="number" class="form-control" id="serviceDuration" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="serviceDescription" class="form-label">Descrição (opcional)</label>
+                        <textarea class="form-control" id="serviceDescription" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="saveNewService">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}<form id="businessForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="studio_name" class="form-label">Nome do Studio</label>
+                            <input type="text" class="form-control" id="studio_name" value="{{ business.studio_name }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Telefone</label>
+                            <input type="text" class="form-control" id="phone" value="{{ business.phone }}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="whatsapp" class="form-label">WhatsApp</label>
+                            <input type="text" class="form-control" id="whatsapp" value="{{ business.whatsapp }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="website" class="form-label">Website/Redes Sociais</label>
+                            <input type="text" class="form-control" id="website" value="{{ business.website or '' }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Endereço</label>
+                        <textarea class="form-control" id="address" rows="2">{{ business.address }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar Informações</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Operating Hours -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Horário de Funcionamento</h3>
+            </div>
+            <div class="card-body">
