@@ -81,7 +81,19 @@ def create_app():
     return app
 
 # Create app instance for Gunicorn
-application = create_app()
+try:
+    application = create_app()
+    print("✓ Application created successfully")
+except Exception as e:
+    print(f"✗ Failed to create application: {e}")
+    import traceback
+    traceback.print_exc()
+    # Create a minimal app to see the error
+    application = Flask(__name__)
+    
+    @application.route('/')
+    def error():
+        return f"Application failed to start: {str(e)}", 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
