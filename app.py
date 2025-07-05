@@ -3,6 +3,8 @@ from config import Config
 from models import db
 from blueprints.admin import admin_bp
 from blueprints.bot import bot_bp
+from webhook_simple import webhook_bp
+app.register_blueprint(webhook_bp)
 import os
 
 def create_app():
