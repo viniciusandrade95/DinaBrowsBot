@@ -1,33 +1,9 @@
 from flask import Flask, redirect, url_for, request, jsonify
+from config import Config
+from models import db
+from blueprints.admin import admin_bp
+from blueprints.bot import bot_bp
 import os
-
-try:
-    from config import Config
-    print("✓ Config imported")
-except Exception as e:
-    print(f"✗ Failed to import Config: {e}")
-    # Create a minimal config
-    class Config:
-        SECRET_KEY = 'dev'
-        SQLALCHEMY_DATABASE_URI = 'sqlite:///app.db'
-        SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-try:
-    from models import db
-    print("✓ Database models imported")
-except Exception as e:
-    print(f"✗ Failed to import models: {e}")
-    from flask_sqlalchemy import SQLAlchemy
-    db = SQLAlchemy()
-
-try:
-    from blueprints.admin import admin_bp
-    from blueprints.bot import bot_bp
-    print("✓ Blueprints imported")
-except Exception as e:
-    print(f"✗ Failed to import blueprints: {e}")
-    admin_bp = None
-    bot_bp = None
 
 def create_app():
     app = Flask(__name__)
